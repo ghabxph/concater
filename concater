@@ -9,7 +9,7 @@ echo "  ██║   ██║ ██║██║╚████║██║   �
 echo "  ╚████╗╚████╔╝██║ ╚███║╚████╗██║ ██║  ██║  █████╗██║ ██║" . PHP_EOL;
 echo "   ╚═══╝ ╚═══╝   ╚═╝ ╚═╝ ╚═══╝╚═╝ ╚═╝  ╚═╝  ╚════╝╚═╝ ╚═╝" . PHP_EOL;
 echo "         Developed by Gabriel Lucernas Pascual" . PHP_EOL;
-echo "               Since December 17 2016" . PHP_EOL;
+echo "               Since December 17, 2016" . PHP_EOL;
 echo "                   Version 1.0.0" . PHP_EOL;
 echo "         Site URL: http://ghabxph.info/concater" . PHP_EOL;
 echo "    Repository URL: https://github.com/ghabxph/concater" . PHP_EOL;
@@ -49,8 +49,12 @@ Class Concater{
     public function concat(array $aConfig): array{
         if(!isset($aConfig['concater'])) return array('bStatus' => false, 'sMsg' => 'Invalid concater file.');
         foreach($aConfig['concater'] as $aFiles){
-
-            echo 'Preparing things for your ' . basename($aFiles['vendor-file']) . PHP_EOL . PHP_EOL . PHP_EOL;
+            echo '  ################################################################' . PHP_EOL;
+            echo '  ##' . PHP_EOL;
+            echo '  ##   Preparing things for your ' . basename($aFiles['vendor-file']) . PHP_EOL;
+            echo '  ##' . PHP_EOL;
+            echo '  ################################################################' . PHP_EOL;
+            echo PHP_EOL;
             echo "Downloading and concatinating remote files..." . PHP_EOL;
             echo "------------------------------------------------------" . PHP_EOL . PHP_EOL;
             $aRemote = $this->concatRemoteFiles($aFiles);
@@ -66,20 +70,38 @@ Class Concater{
             if($aLocal['bStatus'] === false)
                 return array('bStatus' => false, 'sMsg' => $aLocal['sMsg']);
 
-            echo 'Concatenating remote files and local files...' . PHP_EOL . PHP_EOL;
+            echo PHP_EOL;
+            echo '        ###################################################' . PHP_EOL;
+            echo '        ## Concatenating remote files and local files...' . PHP_EOL;
+            echo '        ##' . PHP_EOL;
             $sConcat = $aRemote['sMsg'] . $aLocal['sMsg'];
-            echo 'Done concatenating remote files and local files. Will write this to your ' . basename($aFiles['vendor-file']) . PHP_EOL . PHP_EOL;
-
-            echo 'Creating/Opening ' . basename($aFiles['vendor-file']) . PHP_EOL . PHP_EOL;
+            echo '        ## Done concatenating remote files and local files. Will write this to your ' . basename($aFiles['vendor-file']) . PHP_EOL;
+            echo '        ##' . PHP_EOL;
+            echo '        ## Creating/Opening ' . basename($aFiles['vendor-file']) . PHP_EOL;
+            echo '        ##' . PHP_EOL;
             $rDest = fopen($aFiles['vendor-file'], "w");
-            echo 'Overwritting existing ' . basename($aFiles['vendor-file']) . ' file' . PHP_EOL . PHP_EOL;
+            echo '        ## Overwritting existing ' . basename($aFiles['vendor-file']) . ' file' . PHP_EOL;
             fwrite($rDest, $sConcat);
-            echo 'Operations on ' . basename($aFiles['vendor-file']) . ' file is done. Now closing this file.' . PHP_EOL . PHP_EOL;
+            echo '        ##' . PHP_EOL;
+            echo '        ## Operations on ' . basename($aFiles['vendor-file']) . ' file is done. Now closing this file.' . PHP_EOL;
+            echo '        ##' . PHP_EOL;
+            echo '        ###################################################' . PHP_EOL;
             fclose($rDest);
-            echo PHP_EOL . PHP_EOL . PHP_EOL . PHP_EOL;
-        }
+            echo PHP_EOL;
+            echo '8  88            8""""8                     8   8' . PHP_EOL;
+            echo '8   8 eeeeeee    8    8 eeeee eeeee eeee    8   8 eeee eeeee  eeee' . PHP_EOL;
+            echo '8e    8  8  8    8e   8 8  88 8   8 8       8eee8 8    8   8  8' . PHP_EOL;
+            echo '88    8e 8  8    88   8 8   8 8e  8 8eee    88  8 8eee 8eee8e 8eee' . PHP_EOL;
+            echo '88    88 8  8    88   8 8   8 88  8 88      88  8 88   88   8 88' . PHP_EOL;
+            echo '88    88 8  8    88eee8 8eee8 88  8 88ee    88  8 88ee 88   8 88ee 88 88 88' . PHP_EOL;
+            echo '------------------------ I \' M  D O N E  H E R E ------------------------' . PHP_EOL;
+            echo PHP_EOL;
+        }                                                                   
+        echo PHP_EOL;                                                                 
+        echo PHP_EOL;                                                                 
+        echo '    DO SOMETHING PRODUCTIVE :)';                                                                               
 
-        return array('bStatus' => true, 'sMsg' => 'Done! Do something more productive! :)');
+        return array('bStatus' => true, 'sMsg' => '');
     }
 
     /**
