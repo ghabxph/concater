@@ -24,7 +24,7 @@ Easily concatenates local files and from remote files.
             "vendor-file" : "full-path-of-your-vendor-file"
         },
         {
-            // repeat above ...
+            /* repeat above ... */
         }
     ]
 }
