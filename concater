@@ -1,0 +1,188 @@
+<?php
+
+echo PHP_EOL . PHP_EOL . PHP_EOL;
+echo ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,," . PHP_EOL . PHP_EOL;
+echo "   ████╗ ████╗ ███╗  ██╗ ████╗ ████╗ ██████╗█████╗█████╗" . PHP_EOL;
+echo "  ██╔══╝██╔═██╗████╗ ██║██╔══╝██╔═██╗╚═██╔═╝██╔══╝██╔═██╗" . PHP_EOL;
+echo "  ██║   ██║ ██║██╔██╗██║██║   ██████║  ██║  ███╗  █████╔╝" . PHP_EOL;
+echo "  ██║   ██║ ██║██║╚████║██║   ██╔═██║  ██║  ██╔╝  ██╔═██╗" . PHP_EOL;
+echo "  ╚████╗╚████╔╝██║ ╚███║╚████╗██║ ██║  ██║  █████╗██║ ██║" . PHP_EOL;
+echo "   ╚═══╝ ╚═══╝   ╚═╝ ╚═╝ ╚═══╝╚═╝ ╚═╝  ╚═╝  ╚════╝╚═╝ ╚═╝" . PHP_EOL;
+echo "         Developed by Gabriel Lucernas Pascual" . PHP_EOL;
+echo "               Since December 17 2016" . PHP_EOL;
+echo "                   Version 1.0.0" . PHP_EOL;
+echo "         Site URL: http://ghabxph.info/concater" . PHP_EOL;
+echo "    Repository URL: https://github.com/ghabxph/concater" . PHP_EOL;
+echo PHP_EOL;
+echo "``````````````````````````````````````````````````````````" . PHP_EOL . PHP_EOL;
+
+/**
+ * The Concater Class
+ *
+ * @author      Gabriel Lucernas Pascual <me@ghabxph.info>
+ * @since       2016.12.17
+ * @requires    PHP v7
+ * @version     1.0.0
+ */
+Class Concater{
+
+    /**
+     * Method that concatinates files
+     * @param  array $aFiles            The array containing the local or remote path of the files.
+     *                                  Format:
+     *                                  array(
+     *                                      'concater' => array(
+     *                                          array(
+     *                                              'remote' => array(
+     *                                                  'remote_address_of_file_to_concatinate', ....
+     *                                               ),'local' => array(
+     *                                                   'path-to-file' => array(
+     *                                                       'name-of-file', ....
+     *                                                   ), ....
+     *                                              )
+     *                                          ), array ( ... ) ...
+     *                                      )
+     *                                 )
+     * @param  string $sVendorFilePath  The path of the vendor file
+     * @return array                    Array that contains the status of the function.
+     */
+    public function concat(array $aConfig): array{
+        if(!isset($aConfig['concater'])) return array('bStatus' => false, 'sMsg' => 'Invalid concater file.');
+        foreach($aConfig['concater'] as $aFiles){
+
+            echo 'Preparing things for your ' . basename($aFiles['vendor-file']) . PHP_EOL . PHP_EOL . PHP_EOL;
+            echo "Downloading and concatinating remote files..." . PHP_EOL;
+            echo "------------------------------------------------------" . PHP_EOL . PHP_EOL;
+            $aRemote = $this->concatRemoteFiles($aFiles);
+            echo PHP_EOL;
+            echo "Concatenating local files..." . PHP_EOL;
+            echo "------------------------------------------------------" . PHP_EOL . PHP_EOL;
+            $aLocal = $this->concatLocalFiles($aFiles);
+            echo PHP_EOL;
+
+            if($aRemote['bStatus'] === false)
+                return array('bStatus' => false, 'sMsg' => $aRemote['sMsg']);
+
+            if($aLocal['bStatus'] === false)
+                return array('bStatus' => false, 'sMsg' => $aLocal['sMsg']);
+
+            echo 'Concatenating remote files and local files...' . PHP_EOL . PHP_EOL;
+            $sConcat = $aRemote['sMsg'] . $aLocal['sMsg'];
+            echo 'Done concatenating remote files and local files. Will write this to your ' . basename($aFiles['vendor-file']) . PHP_EOL . PHP_EOL;
+
+            echo 'Creating/Opening ' . basename($aFiles['vendor-file']) . PHP_EOL . PHP_EOL;
+            $rDest = fopen($aFiles['vendor-file'], "w");
+            echo 'Overwritting existing ' . basename($aFiles['vendor-file']) . ' file' . PHP_EOL . PHP_EOL;
+            fwrite($rDest, $sConcat);
+            echo 'Operations on ' . basename($aFiles['vendor-file']) . ' file is done. Now closing this file.' . PHP_EOL . PHP_EOL;
+            fclose($rDest);
+            echo PHP_EOL . PHP_EOL . PHP_EOL . PHP_EOL;
+        }
+
+        return array('bStatus' => true, 'sMsg' => 'Done! Do something more productive! :)');
+    }
+
+    /**
+     * Method that concatinates files from remote.
+     * @param  array $aFiles Array containing the files 
+     * @return array         Array containing the status and the string.
+     */
+    private function concatRemoteFiles(array $aFiles): array{
+        $sMsg = '';
+        if(!isset($aFiles['remote'])){
+            return array('bStatus' => true, 'sMsg' => $sMsg);
+        }
+        $aFiles = $aFiles['remote'];
+        foreach($aFiles as $sFile){
+            echo "    Downloading " . basename($sFile) . "..." . PHP_EOL;
+            $sMsg .= file_get_contents($sFile) . PHP_EOL;
+            echo "    " . basename($sFile) . " has been downloaded successfully." . PHP_EOL;
+        }
+        return array('bStatus' => true, 'sMsg' => $sMsg);
+    }
+
+    /**
+     * Method that concatinates files from local
+     * @param  array $aFiles Array containing the files 
+     * @return array         Array containing the status and the string.
+     */
+    private function concatLocalFiles(array $aFiles): array{
+        $sMsg = '';
+        if(!isset($aFiles['local'])){
+            return array('bStatus' => true, 'sMsg' => $sMsg);
+        }
+        $aFiles = $aFiles['local'];
+        foreach($aFiles as $path => $aFile){
+            foreach($aFile as $sFile){
+                echo "    Adding " . basename($sFile) . "..." . PHP_EOL;
+                $sMsg .= file_get_contents("$path/$sFile") . PHP_EOL;
+                echo "    " . basename($sFile) . " has been added!" .  PHP_EOL;
+            }
+        }
+        return array('bStatus' => true, 'sMsg' => $sMsg);
+    }
+}
+
+// Instantiates our Concater
+$oConcater = new Concater();
+
+// Nothing. Just status...
+$aStatus = array();
+
+if(!isset($argv[1])){
+    echo 'Usage:' . PHP_EOL;
+    echo 'php concater <concater.json path>:' . PHP_EOL;
+    die();
+}
+$sConcater = @file_get_contents($argv[1]);
+
+if(strlen($sConcater) === 0){
+    die('Invalid concater file.');
+}
+
+$aFiles = json_decode($sConcater, true);
+
+$sMsg = $oConcater->concat($aFiles);
+$sMsg = $sMsg['sMsg'];
+
+echo $sMsg;
+
+/*
+array_push($aStatus, $oConcater->concat(
+    array(
+        'remote' => array(
+            'https://code.jquery.com/jquery-3.1.1.min.js',
+            'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'
+        ),
+        'local' => array(
+            'D:/dev/www/dev.ghabxph.info/public/assets/dev/js' => array(
+                'default.js',
+                'somejs.js'
+            )
+        )
+    ),
+    'D:/dev/www/dev.ghabxph.info/public/assets/prod/vendor.js'
+));
+
+array_push($aStatus, $oConcater->concat(
+    array(
+        'remote' => array(
+            'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css',
+            'https://raw.githubusercontent.com/daneden/animate.css/master/animate.css'
+        ),
+        'local' => array(
+            'D:/dev/www/dev.ghabxph.info/public/assets/dev/css' => array(
+                'default.css'
+            )
+        )
+    ),
+    'D:/dev/www/dev.ghabxph.info/public/assets/prod/vendor.css'
+));
+
+foreach($aStatus as $aStat){
+    if($aStat['bStatus'] === false){
+        die($aStat['msg']);
+    }
+}
+
+echo "Concatenated files successfully.";*/
