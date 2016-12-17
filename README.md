@@ -1,5 +1,5 @@
 # concater
-Easily concatenates local files and from remote files.
+Easily downloads concatenates remote and local files into one single file.
 
 
 ####To use concater, you need to create a json file first that has a format like this:
