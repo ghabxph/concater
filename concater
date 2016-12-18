@@ -251,6 +251,7 @@ Class Concater{
 
         $sVendorFile = dirname($aFiles['vendor-file']) .'/remote.' . basename($aFiles['vendor-file']);
         if(file_exists($sVendorFile) && $bNoCache === false){
+            if($bShowEcho) echo "    Retrieving the cache file " . basename($sFile) . " instead of redownloading everything..." . PHP_EOL;
             $sMsg = file_get_contents($sVendorFile);
             return array('bStatus' => true, 'sMsg' => $sMsg);
         }
