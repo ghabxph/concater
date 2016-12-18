@@ -27,6 +27,30 @@ echo "``````````````````````````````````````````````````````````" . PHP_EOL . PH
 Class Concater{
 
     /**
+     * The configuration array
+     * @var array
+     */
+    private $aConfig;
+
+    /**
+     * The no-cache flag
+     * @var boolean
+     */
+    private $bNoCache;
+
+    /**
+     * The watch flag
+     * @var boolean
+     */
+    private $bWatch;
+
+    /**
+     * The datetime format constant
+     * @var string
+     */
+    const DATETIME_FORMAT = "F d Y H:i:s";
+
+    /**
      * Method that concatinates files
      * @param  array $aFiles            The array containing the local or remote path of the files.
      *                                  Format:
@@ -46,8 +70,15 @@ Class Concater{
      * @param  string $sVendorFilePath  The path of the vendor file
      * @return array                    Array that contains the status of the function.
      */
-    public function concat(array $aConfig): array{
+    public function concat(array $aConfig, bool $bNoCache = false, bool $bWatch = false): array{
         if(!isset($aConfig['concater'])) return array('bStatus' => false, 'sMsg' => 'Invalid concater file.');
+
+        $this->aConfig = $aConfig;
+        $this->bNoCache = $bNoCache;
+        $this->bWatch = $bWatch;
+
+        $aConfig = $this->standardizeConcaterConfigFormat();
+
         foreach($aConfig['concater'] as $aFiles){
             echo '  ################################################################' . PHP_EOL;
             echo '  ##' . PHP_EOL;
@@ -57,7 +88,7 @@ Class Concater{
             echo PHP_EOL;
             echo "Downloading and concatinating remote files..." . PHP_EOL;
             echo "------------------------------------------------------" . PHP_EOL . PHP_EOL;
-            $aRemote = $this->concatRemoteFiles($aFiles);
+            $aRemote = $this->concatRemoteFiles($aFiles, $bNoCache);
             echo PHP_EOL;
             echo "Concatenating local files..." . PHP_EOL;
             echo "------------------------------------------------------" . PHP_EOL . PHP_EOL;
@@ -96,51 +127,166 @@ Class Concater{
             echo '88    88 8  8    88eee8 8eee8 88  8 88ee    88  8 88ee 88   8 88ee 88 88 88' . PHP_EOL;
             echo '------------------------ I \' M  D O N E  H E R E ------------------------' . PHP_EOL;
             echo PHP_EOL;
-        }                                                                   
-        echo PHP_EOL;                                                                 
-        echo PHP_EOL;                                                                 
-        echo '    DO SOMETHING PRODUCTIVE :)';                                                                               
+        }
+        echo PHP_EOL;
+        echo PHP_EOL;
+
+        if($bWatch){
+            $this->watch();
+        }
+
+        echo '    DO SOMETHING PRODUCTIVE :)';              
 
         return array('bStatus' => true, 'sMsg' => '');
     }
 
     /**
-     * Method that concatinates files from remote.
-     * @param  array $aFiles Array containing the files 
-     * @return array         Array containing the status and the string.
+     * Standardize the Concater's configuration format. This will change numerical index
+     * of local files into a file name as a key, and filemtime date formatted as a string as a value.
+     * @return array The standardized format.
      */
-    private function concatRemoteFiles(array $aFiles): array{
+    private function standardizeConcaterConfigFormat(){
+        for($i = 0; $i < count($this->aConfig['concater']); $i++){
+            foreach($this->aConfig['concater'][$i]['local'] as $sPath => $aFiles){
+                $aArray = array();
+                foreach($aFiles as $sFile){
+                    $aArray[$sFile] = '<last-modification-datetime-format-here>';
+                }
+                $this->aConfig['concater'][$i]['local'][$sPath] = $aArray;
+            }
+        }
+        return $this->aConfig;
+    }
+
+    /**
+     * Retrieves and sets the local file modification time on each local file in the config.
+     * @return array The configuration array ($this->aConfig)
+     */
+    private function updateLocalFileModificationTime(){
+        for($i = 0; $i < count($this->aConfig['concater']); $i++){
+            foreach($this->aConfig['concater'][$i]['local'] as $sPath => $aFiles){
+                foreach($aFiles as $sFile => $sLastModificationTime){
+                    $this->aConfig['concater'][$i]['local'][$sPath][$sFile] = date(self::DATETIME_FORMAT, filemtime("$sPath/$sFile"));
+                }
+            }
+        }
+        return $this->aConfig;
+    }
+
+    /**
+     * Watches every changes from local files
+     * @return void nothing
+     */
+    private function watch(){
+
+        echo "                         __..--.._" . PHP_EOL;
+        echo "  .....              .--~  .....  `." . PHP_EOL;
+        echo ".\":    \"`-..  .    .' ..-'\"    :\". `" . PHP_EOL;
+        echo "` `._ ` _.'`\"(     `-\"'`._ ' _.' '" . PHP_EOL;
+        echo "     ~~~      `.          ~~~" . PHP_EOL;
+        echo "              .'" . PHP_EOL;
+        echo "             /" . PHP_EOL;
+        echo "            (" . PHP_EOL;
+        echo "             ^---'" . PHP_EOL;
+        echo '    Now watching for changes ...' . PHP_EOL;
+        echo '........................................' . PHP_EOL;
+        echo '||' . PHP_EOL;
+
+        while(true){
+            foreach($this->aConfig['concater'] as $aConfig){
+                $aStatus = $this->fileHasChangedInLocal($aConfig);
+                if($aStatus['bStatus']){
+                    echo '||    ' . date(self::DATETIME_FORMAT . ': ', time()) . $aStatus['sMsg'];
+                    $aRemote = $this->concatRemoteFiles($aConfig, false, false);
+                    $aLocal = $this->concatLocalFiles($aConfig, false);
+                    file_put_contents($aConfig['vendor-file'], $aRemote['sMsg'] . $aLocal['sMsg']);
+                }
+            }
+            usleep(300000);
+        }
+    }
+
+    /**
+     * Detects whether there are changes in the local files included in the configuration array.
+     * @param  array $aConfig   The configuration array
+     *                          Format:
+     *                          array(
+     *                              'remote' => array(
+     *                                  'address of the file', ...
+     *                              ),
+     *                              'local' => array(
+     *                                  'path-of-the-file(s)' => array(
+     *                                      'file-names-in-path' => 'last-modified'
+     *                                  ) 
+     *                              ),
+     *                              'vendor-file' => 'string path to vendor'
+     *                          )
+     * @return array          An array containing the status whether there is a change in files or not.
+     */
+    private function fileHasChangedInLocal($aConfig){
+        if(!isset($aConfig['local'])){
+            return array('bStatus' => false);
+        }
+        foreach($aConfig['local'] as $sPath => $aFiles){
+            foreach($aConfig['local'][$sPath] as $sFileName => $sLastModified){
+                if($sLastModified !== date(self::DATETIME_FORMAT, filemtime($sPath . '/' . $sFileName))){
+                    return array('bStatus' => true, 'sMsg' => "$sFileName has changed." . PHP_EOL);
+                }
+            }
+        }
+        return array('bStatus' => false);
+    }
+
+    /**
+     * Method that concatinates files from remote.
+     * @param  array $aFiles     Array containing the files 
+     * @param  bool  $bShowEcho  Boolean that determines whether an echo should be shown or not.
+     * @return array             Array containing the status and the string.
+     */
+    private function concatRemoteFiles(array $aFiles, bool $bNoCache, bool $bShowEcho = true): array{
         $sMsg = '';
         if(!isset($aFiles['remote'])){
+            return array('bStatus' => true, 'sMsg' => 'Remote is not set.');
+        }
+
+        $sVendorFile = dirname($aFiles['vendor-file']) .'/remote.' . basename($aFiles['vendor-file']);
+        if(file_exists($sVendorFile) && $bNoCache === false){
+            $sMsg = file_get_contents($sVendorFile);
             return array('bStatus' => true, 'sMsg' => $sMsg);
         }
+
         $aFiles = $aFiles['remote'];
         foreach($aFiles as $sFile){
-            echo "    Downloading " . basename($sFile) . "..." . PHP_EOL;
+            if($bShowEcho) echo "    Downloading " . basename($sFile) . "..." . PHP_EOL;
             $sMsg .= file_get_contents($sFile) . PHP_EOL;
-            echo "    " . basename($sFile) . " has been downloaded successfully." . PHP_EOL;
+            if($bShowEcho) echo "    " . basename($sFile) . " has been downloaded successfully." . PHP_EOL;
         }
+        file_put_contents("$sVendorFile", $sMsg);
+
         return array('bStatus' => true, 'sMsg' => $sMsg);
     }
 
     /**
      * Method that concatinates files from local
      * @param  array $aFiles Array containing the files 
+     * @param  bool  $bShowEcho  Boolean that determines whether an echo should be shown or not.
      * @return array         Array containing the status and the string.
      */
-    private function concatLocalFiles(array $aFiles): array{
+    private function concatLocalFiles(array $aFiles, $bShowEcho = true): array{
         $sMsg = '';
         if(!isset($aFiles['local'])){
-            return array('bStatus' => true, 'sMsg' => $sMsg);
+            return array('bStatus' => true, 'sMsg' => 'Local is not set.');
         }
         $aFiles = $aFiles['local'];
-        foreach($aFiles as $path => $aFile){
-            foreach($aFile as $sFile){
-                echo "    Adding " . basename($sFile) . "..." . PHP_EOL;
-                $sMsg .= file_get_contents("$path/$sFile") . PHP_EOL;
-                echo "    " . basename($sFile) . " has been added!" .  PHP_EOL;
+        foreach($aFiles as $sPath => $aFile){
+            foreach($aFile as $sFile => $sLastModification){
+                $sFileBaseName = basename("$sPath/$sFile");
+                if($bShowEcho) echo "    Adding " . $sFileBaseName . "..." . PHP_EOL;
+                $sMsg .= file_get_contents("$sPath/$sFile") . PHP_EOL;
+                if($bShowEcho) echo "    " . $sFileBaseName . " has been added!" .  PHP_EOL;
             }
         }
+        $this->updateLocalFileModificationTime();
         return array('bStatus' => true, 'sMsg' => $sMsg);
     }
 }
@@ -153,7 +299,7 @@ $aStatus = array();
 
 if(!isset($argv[1])){
     echo 'Usage:' . PHP_EOL;
-    echo 'php concater <concater.json path>:' . PHP_EOL;
+    echo 'php concater <concater.json path>: <[--watch | -w] | [--no-cache | -nc]>' . PHP_EOL;
     die();
 }
 $sConcater = @file_get_contents($argv[1]);
@@ -164,47 +310,18 @@ if(strlen($sConcater) === 0){
 
 $aFiles = json_decode($sConcater, true);
 
-$sMsg = $oConcater->concat($aFiles);
-$sMsg = $sMsg['sMsg'];
+$bNoCache = false;
+$bWatch = false;
 
-echo $sMsg;
-
-/*
-array_push($aStatus, $oConcater->concat(
-    array(
-        'remote' => array(
-            'https://code.jquery.com/jquery-3.1.1.min.js',
-            'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'
-        ),
-        'local' => array(
-            'D:/dev/www/dev.ghabxph.info/public/assets/dev/js' => array(
-                'default.js',
-                'somejs.js'
-            )
-        )
-    ),
-    'D:/dev/www/dev.ghabxph.info/public/assets/prod/vendor.js'
-));
-
-array_push($aStatus, $oConcater->concat(
-    array(
-        'remote' => array(
-            'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css',
-            'https://raw.githubusercontent.com/daneden/animate.css/master/animate.css'
-        ),
-        'local' => array(
-            'D:/dev/www/dev.ghabxph.info/public/assets/dev/css' => array(
-                'default.css'
-            )
-        )
-    ),
-    'D:/dev/www/dev.ghabxph.info/public/assets/prod/vendor.css'
-));
-
-foreach($aStatus as $aStat){
-    if($aStat['bStatus'] === false){
-        die($aStat['msg']);
+array_shift($argv);
+foreach($argv as $sArg){
+    if($sArg === '--watch' || $sArg === '-w'){
+        $bWatch = true;
+    }else if($sArg === '-no-cache' || $sArg === '-nc'){
+        $bNoCache = true;
     }
 }
 
-echo "Concatenated files successfully.";*/
+$sMsg = $oConcater->concat($aFiles, $bNoCache, $bWatch);
+$sMsg = $sMsg['sMsg'];
+echo $sMsg;
