@@ -1,6 +1,9 @@
 # concater
 Easily downloads concatenates remote and local files into one single file.
 
+## Requirements
+ - PHP 7 (I've been using PHP 7.0.9 to be exact)
+
 ## Usage:
 `php concater <config> <[--watch | -w] | [--no-cache | -nc]>`
 ```
