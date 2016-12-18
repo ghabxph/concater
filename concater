@@ -10,7 +10,7 @@ echo "  ╚████╗╚████╔╝██║ ╚███║╚█�
 echo "   ╚═══╝ ╚═══╝   ╚═╝ ╚═╝ ╚═══╝╚═╝ ╚═╝  ╚═╝  ╚════╝╚═╝ ╚═╝" . PHP_EOL;
 echo "         Developed by Gabriel Lucernas Pascual" . PHP_EOL;
 echo "               Since December 17, 2016" . PHP_EOL;
-echo "                   Version 1.0.1" . PHP_EOL;
+echo "                 Version 1.0.1.1" . PHP_EOL;
 echo "         Site URL: http://ghabxph.info/concater" . PHP_EOL;
 echo "    Repository URL: https://github.com/ghabxph/concater" . PHP_EOL;
 echo PHP_EOL;
@@ -251,7 +251,7 @@ Class Concater{
 
         $sVendorFile = dirname($aFiles['vendor-file']) .'/remote.' . basename($aFiles['vendor-file']);
         if(file_exists($sVendorFile) && $bNoCache === false){
-            if($bShowEcho) echo "    Retrieving the cache file " . basename($sFile) . " instead of redownloading everything..." . PHP_EOL;
+            if($bShowEcho) echo "    Retrieving the cache file " . basename($sVendorFile) . " instead of redownloading everything..." . PHP_EOL;
             $sMsg = file_get_contents($sVendorFile);
             return array('bStatus' => true, 'sMsg' => $sMsg);
         }
