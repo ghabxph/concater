@@ -1,6 +1,13 @@
 # concater
 Easily downloads concatenates remote and local files into one single file.
 
+## Usage:
+`php concater <config> <[--watch | -w] | [--no-cache | -nc]>`
+```
+config            - The configuration file in JSON format. (See below)
+--watch or -w     - Determines whether you will watch or not.
+--no-cache or -nc - Ignores the cache file for remote files, and will always download them.
+```
 
 ####To use concater, you need to create a json file first that has a format like this:
 ```json
@@ -178,8 +185,13 @@ Concatenating local files...
     DO SOMETHING PRODUCTIVE :)
 ```
 
-Update as of December 18 2016: 9:22 PM
+###Update as of December 18 2016: 9:22 PM
     - Concater can watch file now. Simply add --watch or -watch command
     - Concater has a caching mechanism for remote files so that it will not download files automatically, but instead, save it in a cache file called remote.--vendor-file-name-- (something like that), under your vendor folder.
         - Cache can be bypassed and force the downloading of files using -nc or --no-cache command.
         - --no-cache will not disable caching, but instead, it will bypass reading the cache created. Therefore, concater will still cache remote files in your remote.--vendor-file-name--.
+    - Added basic help for concater.
+
+###Future things to add in my concater tool
+    - A config builder
+    - A more concise help

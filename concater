@@ -22,7 +22,7 @@ echo "``````````````````````````````````````````````````````````" . PHP_EOL . PH
  * @author      Gabriel Lucernas Pascual <me@ghabxph.info>
  * @since       2016.12.17
  * @requires    PHP v7
- * @version     1.0.0
+ * @version     1.0.1
  */
 Class Concater{
 
@@ -299,7 +299,10 @@ $aStatus = array();
 
 if(!isset($argv[1])){
     echo 'Usage:' . PHP_EOL;
-    echo 'php concater <concater.json path>: <[--watch | -w] | [--no-cache | -nc]>' . PHP_EOL;
+    echo 'php concater <concater.json path> <[--watch | -w] | [--no-cache | -nc]>' . PHP_EOL;
+    echo 'config            - The configuration file in JSON format. (See below)' . PHP_EOL;
+    echo '--watch or -w     - Determines whether you will watch or not.' . PHP_EOL;
+    echo '--no-cache or -nc - Ignores the cache file for remote files, and will always download them.' . PHP_EOL;
     die();
 }
 $sConcater = @file_get_contents($argv[1]);
