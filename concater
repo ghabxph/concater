@@ -10,7 +10,7 @@ echo "  ╚████╗╚████╔╝██║ ╚███║╚█�
 echo "   ╚═══╝ ╚═══╝   ╚═╝ ╚═╝ ╚═══╝╚═╝ ╚═╝  ╚═╝  ╚════╝╚═╝ ╚═╝" . PHP_EOL;
 echo "         Developed by Gabriel Lucernas Pascual" . PHP_EOL;
 echo "               Since December 17, 2016" . PHP_EOL;
-echo "                   Version 1.0.0" . PHP_EOL;
+echo "                   Version 1.0.1" . PHP_EOL;
 echo "         Site URL: http://ghabxph.info/concater" . PHP_EOL;
 echo "    Repository URL: https://github.com/ghabxph/concater" . PHP_EOL;
 echo PHP_EOL;
