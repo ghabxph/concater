@@ -189,7 +189,7 @@ Concatenating local files...
 ```
 
 ###Update as of December 18 2016: 9:22 PM
-* Concater can watch file now. Simply add --watch or -watch command
+* Concater can watch file now. Simply add --watch or -w command
 * Concater has a caching mechanism for remote files so that it will not download files automatically, but instead, save it in a cache file called remote.--vendor-file-name-- (something like that), under your vendor folder.
     * Cache can be bypassed and force the downloading of files using -nc or --no-cache command.
     * --no-cache will not disable caching, but instead, it will bypass reading the cache created. Therefore, concater will still cache remote files in your remote.--vendor-file-name--.
